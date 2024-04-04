@@ -9,8 +9,8 @@ pygame.font.init()
 
 clock = pygame.time.Clock()
 FPS = 60
-SCREEN_WIDTH = 1400
-SCREEN_HEIGHT = 800
+SCREEN_WIDTH = 1000
+SCREEN_HEIGHT = 576
 
 tile_size = SCREEN_HEIGHT/16
 
@@ -26,17 +26,24 @@ C_DASH1 = pygame.K_SPACE
 C_DASH2 = pygame.K_LSHIFT
 C_SNEAK = pygame.K_s
 
-INT_SIZE = 60
-SPEED = 1
-DASH_SPEED = 30
-DASH_LOSS = 2
-JUMP_HEIGHT = 15
-DOUBLEJUMP_LOSS = 1
+def SH(value):
+    return round(value/1.4)
+
+def SW(value):
+    return round(value/1.4)
+
+INT_SIZE = SW(60)
+SPEED = 0.7
+DASH_SPEED = SW(30)
+DASH_LOSS = SW(2)
+JUMP_HEIGHT = SW(15)
+DOUBLEJUMP_LOSS = SW(1)
 GRAVITY = 1
 FRICTION = 1.1
-MIN_SIZE = 200
+MIN_SIZE = SW(200)
 RESPAWN_TIME = 2
 
+#(Texture_Pack,Max_Colums,)
 #(Texture_Pack,Max_Colums,)
 Level_Dat = [
     (0,270,1,'WHITE',0.05,pygame.mixer.Sound(r'assets\sounds\music\polar.mp3')),
@@ -63,7 +70,7 @@ Damage_Dat = [
     73:(1,(0.4,4,'GREY30',3,0,-3,2,1,1))
 },
 {
-    0:(1/2,(0.1,10,'ORANGERED',8,0,-2,2,1,2)),
+    0:(1/2,(0.01,10,'ORANGERED',8,0,-2,2,1,2)),
     2:(2,(0.1,4,'ORANGERED',8,0,-2,2,1,2)),
     3:(2,(0.1,4,'ORANGERED',8,0,-2,2,1,2)),
     4:(2,(0.1,4,'ORANGERED',8,0,-2,2,1,2))
@@ -86,8 +93,11 @@ font = pygame.font.Font(r'assets/img/Font.ttf',int(SCREEN_WIDTH/50))
 path = 'Data.txt'
 
 if not os.path.isfile(path):
+
     with open(path,'w') as file:
         file.write('0')
+
+
 
 class World():
     def __init__(self,dat,Texturepack,Id):
@@ -122,10 +132,11 @@ class World():
             self.extra_list = []
             for x in range(ExtraTYPES):
                 img = pygame.image.load(f'assets/img/extras{self.Texturepack}/{x}.png').convert_alpha()
+                img = pygame.transform.scale(img, (SW(img.get_width()), SH(img.get_height())))
                 self.extra_list.append(img)
 
-        self.Scroll = 100
-        self.Spawnpoint = (500,100,self.Scroll)
+        self.Scroll = SW(100)
+        self.Spawnpoint = (SW(500),SH(100),self.Scroll)
         self.active_Spawnpoint = pygame.Rect(0,0,0,0)
 
         self.Tile_List = []
@@ -135,11 +146,9 @@ class World():
 
         for ir,row in enumerate(self.dat):
             for it,tile in enumerate(row):
-                if str(tile)[len(str(tile))-1][0][0] == 's':
+                if str(tile[0])[0] == 's' or str(tile)[len(str(tile))-1][0][0] == 's':
                     self.Shade_List.append(get_shade(it,ir,self.Scroll))
-                elif str(tile[0])[0] == 's':
-                    self.Shade_List.append(get_shade(it,ir,self.Scroll))
-
+                    
         for ir, row in enumerate(self.dat):
             for it, tile in enumerate(row):
                 deg = 0
@@ -187,13 +196,13 @@ class World():
 
     def update(self):
         for Shade in self.Shade_List:
-            Shade[0].x = Shade[2]*tile_size-self.Scroll+tile_size-150
+            Shade[0].x = Shade[2]*tile_size-self.Scroll+tile_size-SW(150)
                     
         for Tile in self.Tile_List:
             Tile[0].x = Tile[3]*tile_size-self.Scroll
         
         for Spawnpoint in self.Spawnpoint_List:
-            Spawnpoint[0].x = Spawnpoint[1]*tile_size-self.Scroll+20
+            Spawnpoint[0].x = Spawnpoint[1]*tile_size-self.Scroll+SW(20)
 
         for Tile in self.Damage_List:
             Tile[0].x = Tile[3]*tile_size-self.Scroll
@@ -202,7 +211,7 @@ class World():
         for ir,row in enumerate(self.dat):
             for it,tile in enumerate(row):
                 if str(tile[0])[0] == 's' or str(tile)[len(str(tile))-1][0][0] == 's':
-                    if self.Scroll+SCREEN_WIDTH+200 > it*tile_size and self.Scroll-(SCREEN_WIDTH+200) < it*tile_size:
+                    if self.Scroll+SW(1600) > it*tile_size and self.Scroll-(SW(1600)) < it*tile_size:
                         draw_shade(surface,it,ir,self.Scroll)
         
         for tile in self.Damage_List:
@@ -232,12 +241,12 @@ class World():
                             deg += 90
                 
                 if str(tile)[0] == 's':
-                    if self.Scroll+SCREEN_WIDTH+200 > it*tile_size and self.Scroll-(SCREEN_WIDTH+200) < it*tile_size:
+                    if self.Scroll+SW(1600) > it*tile_size and self.Scroll-(SW(1600)) < it*tile_size:
                         surface.blit(pygame.transform.rotate(self.tiles_img[int(tile[1:])],deg), (it * tile_size - self.Scroll, ir * tile_size))
                 
                 elif int(tile) > -1:
                         
-                    if self.Scroll+SCREEN_WIDTH+200 > it*tile_size and self.Scroll-(SCREEN_WIDTH+200) < it*tile_size:
+                    if self.Scroll+SW(1600) > it*tile_size and self.Scroll-(SW(1600)) < it*tile_size:
                         surface.blit(pygame.transform.rotate(self.tiles_img[int(tile)],deg), (it * tile_size - self.Scroll, ir * tile_size))
 
         for ir,row in enumerate(self.dat):
@@ -250,14 +259,14 @@ class World():
                     else:tile = str(tile).split('&')
  
                     if str(tile[0])[0] == 's':
-                        if self.Scroll+SCREEN_WIDTH+200 > it*tile_size and self.Scroll-(SCREEN_WIDTH+200) < it*tile_size:
+                        if self.Scroll+SW(1600) > it*tile_size and self.Scroll-(SW(1600)) < it*tile_size:
                             surface.blit(pygame.transform.rotate(self.tiles_img[int(tile[1:])],deg), (it * tile_size - self.Scroll, ir * tile_size))
 
                     elif int(tile[0]) > -1:
-                        if self.Scroll+SCREEN_WIDTH+200 > it*tile_size and self.Scroll-(SCREEN_WIDTH+200) < it*tile_size:
+                        if self.Scroll+SW(1600) > it*tile_size and self.Scroll-(SW(1600)) < it*tile_size:
                             surface.blit(pygame.transform.rotate(self.tiles_img[int(tile)],deg), (it * tile_size - self.Scroll, ir * tile_size))
 
-                    if self.Spawnpoint[0]+self.Spawnpoint[2] == it * tile_size+20:
+                    if self.Spawnpoint[0]+self.Spawnpoint[2] == it * tile_size+SW(20):
                         surface.blit(self.extra_list[int(tile[1])+1], (it * tile_size - self.Scroll, ir * tile_size))
                         self.active_Spawnpoint = pygame.Rect((it * tile_size - self.Scroll, ir * tile_size,self.extra_list[int(tile[1])+1].get_width(),self.extra_list[int(tile[1])+1].get_height()))
                         spawn_Particle(it * tile_size+self.extra_list[int(tile[1])+1].get_width()/6,ir * tile_size+self.extra_list[int(tile[1])+1].get_height()/3,0.4,1,random.choice(['Snow1','Lightblue1']),4,1.5,0,1,3,1)
@@ -298,10 +307,9 @@ class Player():
         
         self.sneaking = False
         self.sleeptimer = 10
-        self.temperature = -2
 
     def update(self):
-        
+        temperature = 0
         keys = pygame.key.get_pressed()
         if keys[C_LEFT]:
             if keys[C_SNEAK]:
@@ -414,7 +422,7 @@ class Player():
         for tile in self.Level.Damage_List:
             if tile[0].colliderect(self.rect.x +dx, self.rect.y + dy, self.rect.width, self.rect.height):
                     self.melt(Damage_Dat[self.Level.Texturepack][int(tile[2])][0])
-                    self.temperature += Damage_Dat[self.Level.Texturepack][int(tile[2])][0]
+                    temperature += Damage_Dat[self.Level.Texturepack][int(tile[2])][0]
 
 
         for Spawnpoint in self.Level.Spawnpoint_List:
@@ -486,7 +494,7 @@ class Player():
         if sleep == False:
             self.sleeptimer = time + 5
 
-        if self.Level.Scroll < Level_Dat[self.Level.Id][1]*44:
+        if self.Level.Scroll < Level_Dat[self.Level.Id][1]*SW(44):
             if SCREEN_WIDTH/SCREENMOVEMARGIN > self.rect.x + dx or self.rect.x + dx > SCREEN_WIDTH/SCREENMOVEMARGIN*(SCREENMOVEMARGIN-1):
                 self.Level.Scroll += dx
                 dx = 0
@@ -502,18 +510,18 @@ class Player():
         else: height = self.height
 
 
-        self.temperature += self.should_melt()
+        temperature += self.should_melt()
 
         crits = [2, 1, 0.02, 0.015, 0.01, 0.005]
         global thermoindex
-        if self.temperature < 0:
+        
+        if temperature < 0:
             thermoindex = 5
         else:
             for i,crit in enumerate(crits):
-                if self.temperature >= crit:
+                if temperature >= crit:
                     thermoindex = i
                     break
-        self.temperature = 0
 
         self.rect = pygame.Rect(self.rect.x + dx,self.rect.y + dy,self.rect.width,height)
 
@@ -573,7 +581,7 @@ class Player():
                 spawn_Particle(self.rect.x+self.Level.Scroll+self.width/2,self.rect.y+self.height/2,50,1,(random.randint(30,50),170,200),4,0,-1,5,5,1)
                 sound = pygame.mixer.Sound(r'assets/sounds/sfx/explosion.wav')
                 sound.set_volume(0.5)
-                pygame.mixer.Channel(1).play(sound)
+                pygame.mixer.Channel(1).play(sound)                
                 return True
 
     def Respawn(self):
@@ -612,7 +620,7 @@ class Water():
                     area = tile[1].overlap_area(pygame.mask.Mask((self.rect.width,self.rect.height),True),(self.rect.x-tile[0].x-Scroll,self.rect.y-tile[0].y))
                     if area > 0:
                         
-                        dy = self.rect.height+30-area
+                        dy = self.rect.height+SH(30)-area
                         dy = 0
                         self.onfloor = True
                         break
@@ -680,7 +688,7 @@ class Button():
         self.img.blit(self.Text,self.Text.get_rect(center=(self.width/2,self.height/2)))
         self.rect = self.img.get_rect(topleft = cords)
         self.clicked = False
-        self.Hoverrect = (self.rect.x-5,self.rect.y-5,self.rect.width+10,self.rect.height+10)
+        self.Hoverrect = (self.rect.x-SW(5),self.rect.y-SH(5),self.rect.width+SW(10),self.rect.height+SH(10))
 
     def draw(self, surface):
         global clicked
@@ -739,8 +747,10 @@ class LevelButton(Button):
 
             if mouseclicks[0] == 0 and clicked == True:
                 clicked = False
+    
+
         else:
-            surface.blit(pygame.transform.scale(pygame.image.load(r'assets/img/lock.png'),(self.rect.width/3,self.rect.height/2)),(self.rect.x+self.rect.width/4+self.rect.width/12,self.rect.y+self.rect.height/4.5))
+            surface.blit(pygame.transform.scale(pygame.image.load(r'assets/img/lock.png'),(self.rect.width/2,self.rect.height/2)),(self.rect.x+self.rect.width/4,self.rect.y+self.rect.height/5))
 
         return action
 
@@ -788,7 +798,7 @@ class Gif():
 
 class Tutorial_Banner():
     def __init__(self):
-        self.img = pygame.image.load(r'assets/img/tutorial.png')
+        self.img = pygame.transform.scale(pygame.image.load(r'assets/img/tutorial.png'),(SCREEN_WIDTH,SCREEN_HEIGHT))
         
     def draw(self,surface,Scroll):
         opacity = -Scroll+355
@@ -814,8 +824,8 @@ class TypingArea:
         self.area_surface.fill(bk_color)
 
         self.wps = wps
-        self.y = 10
-        self.y_delta = self.font.size("M")[1]+10
+        self.y = SH(10)
+        self.y_delta = self.font.size("M")[1]+SH(10)
 
         self.line = "" 
         self.next_time = time  
@@ -838,7 +848,7 @@ class TypingArea:
         else:
             self.line += c 
             text = self.font.render(self.line, True, self.fg_color)
-            self.area_surface.blit(text, (10, self.y))  
+            self.area_surface.blit(text, (SW(10), self.y))  
 
     def update(self):
         while self.char_queue and self.next_time <= time:
@@ -852,6 +862,8 @@ class TypingArea:
         
 class Thermometer():
     def __init__(self,x,y,size:tuple,value):
+        global thermoindex
+        thermoindex = value
         
         self.images = [
             pygame.transform.scale(pygame.image.load(r'assets/img/thermo/thermo1.png'),(size)),
@@ -945,12 +957,12 @@ def load_World(level,max_cols):
     return world_data
 
 def draw_shade(surface,x,y,Scroll):
-    pygame.draw.polygon(surface, (100,100,100,10), [(x*tile_size-Scroll,y*tile_size+tile_size/2),(x*tile_size-Scroll+tile_size-1,y*tile_size+tile_size/2),(x*tile_size-Scroll+tile_size-150,y*tile_size+SCREEN_HEIGHT),(x*tile_size-Scroll-150,y*tile_size+SCREEN_HEIGHT)])
+    pygame.draw.polygon(surface, (100,100,100,10), [(x*tile_size-Scroll,y*tile_size+tile_size/2),(x*tile_size-Scroll+tile_size-1,y*tile_size+tile_size/2),(x*tile_size-Scroll+tile_size-SW(150),y*tile_size+SCREEN_HEIGHT),(x*tile_size-Scroll-SW(150),y*tile_size+SCREEN_HEIGHT)])
 
 def get_shade(x,y,Scroll):
     img = pygame.surface.Surface((150,SCREEN_HEIGHT))
     img.set_colorkey('BLACK')
-    pygame.draw.polygon(img, 'WHITE', [(100,tile_size/2),(100+tile_size-1,tile_size/2),(-50,SCREEN_HEIGHT*1.4),(tile_size-150,SCREEN_HEIGHT*1.4)])
+    pygame.draw.polygon(img, 'WHITE', [(SW(100),tile_size/2),(SW(100)+tile_size-1,tile_size/2),(SW(-50),SCREEN_HEIGHT*1.4),(tile_size-SW(150),SCREEN_HEIGHT*1.4)])
     return pygame.rect.Rect(x*tile_size-Scroll+tile_size-150,y*tile_size+tile_size/2,150,SCREEN_HEIGHT),pygame.mask.from_surface(img),x
 
 def load_images(path):
@@ -961,7 +973,6 @@ def load_images(path):
         image = pygame.transform.scale(image,(SCREEN_WIDTH,SCREEN_HEIGHT))
         images.append(image)
     return images
-
 
 global time
 time = 0
@@ -1027,9 +1038,9 @@ Your drink awaits, and time is ticking away!
 Good luck on your frosty journey!                         
 You have a big Adventure ahead of yourself!       """
 
-messagex = 3300
-area_rect = pygame.Rect(messagex, SCREEN_HEIGHT/3, 800, 100)
-message = TypingArea(STORY, area_rect, pygame.font.Font(r'assets/img/Font.ttf',int(SCREEN_WIDTH/140)), 'BLACK', 'WHITE', wps=1)
+messagex = SW(3300)
+area_rect = pygame.Rect(messagex, SCREEN_HEIGHT/3, SW(800), SH(100))
+message = TypingArea(STORY, area_rect, pygame.font.Font(r'assets/img/Font.ttf',int(SCREEN_WIDTH/180)), 'BLACK', 'WHITE', wps=1)
 
 with open('Data.txt','r') as file:
     Latest_Level = int(file.read(1))
@@ -1070,10 +1081,10 @@ while run:
                 Latest_Level = int(file.read(1))
 
             level = World(load_World(Latest_Level,Level_Dat[Latest_Level][1]),Level_Dat[Latest_Level][0],Latest_Level) 
-            player = Player(500,300,100,level)
+            player = Player(SW(500),SH(300),SW(100),level)
             
             SUNMELT = Level_Dat[level.Id][2]/200
-            thermometer = Thermometer(00,20,(200,200),5-level.Texturepack)
+            thermometer = Thermometer(SW(00),SW(20),(SW(200),SH(200)),5-level.Texturepack)
             pygame.mixer.Channel(0).play(Level_Dat[level.Id][5],loops=-1)
             gamestate = 'Game'
 
@@ -1084,55 +1095,55 @@ while run:
 
         if Credits_Button.draw(Homescreen):
             Credits =[  
-            CreditText(10,1,30,'THE PERFECT DRINK','orangered'),
-            CreditText(600,1.5,55,'by gabl18 and sir-lordmike','White'),
-            CreditText(700,1.5,60,'made in one week for the','White'),
-            CreditText(750,1.5,60,'Pygame Community Spring Jam 2024','White'),
+            CreditText(SH(10),1,30,'THE PERFECT DRINK','orangered'),
+            CreditText(SH(600),1.5,55,'by gabl18 and sir-lordmike','White'),
+            CreditText(SH(700),1.5,60,'made in one week for the','White'),
+            CreditText(SH(750),1.5,60,'Pygame Community Spring Jam 2024','White'),
 
-            CreditText(850,1.5,60,'This was our first Jam and','lightblue4'),
-            CreditText(900,1.5,60,'one of our first Pygame Games','lightblue4'),
+            CreditText(SH(850),1.5,60,'This was our first Jam and','lightblue4'),
+            CreditText(SH(900),1.5,60,'one of our first Pygame Games','lightblue4'),
 
-            CreditText(1200,1,55,'Lead Programmer: Michael','White'),
-            CreditText(1250,1,55,'Lead Artist: Gabriel','White'),
+            CreditText(SH(1200),1,55,'Lead Programmer: Michael','White'),
+            CreditText(SH(1250),1,55,'Lead Artist: Gabriel','White'),
 
-            CreditText(1400,1,55,'Special Thanks:','grey36'),
-            CreditText(1450,1,60,'Felix','White'),
-            CreditText(1500,1,60,'Ted-Klein-Bergman','White'),
+            CreditText(SH(1400),1,55,'Special Thanks:','grey36'),
+            CreditText(SH(1450),1,60,'Felix','White'),
+            CreditText(SH(1500),1,60,'Ted-Klein-Bergman','White'),
 
-            CreditText(1650,1,60,'for making some Assets','White'),
-            CreditText(1700,1,60,'and helping with Cutscenes','White'),
+            CreditText(SH(1650),1,60,'for making some Assets','White'),
+            CreditText(SH(1700),1,60,'and helping with Cutscenes','White'),
 
-            CreditText(1850,1,60,'Also Special thanks to the','lightblue4'),
-            CreditText(1900,1,60,'Folks from the Pygame Discord','lightblue4'),
-            CreditText(1950,1,60,'for making this possible','lightblue4'),
+            CreditText(SH(1850),1,60,'Also Special thanks to the','lightblue4'),
+            CreditText(SH(1900),1,60,'Folks from the Pygame Discord','lightblue4'),
+            CreditText(SH(1950),1,60,'for making this possible','lightblue4'),
 
-            CreditText(2100,1,55,'Not self made Assets:','grey36'),
-            CreditText(2150,1,60,'quinquefive-font','White'),
+            CreditText(SH(2100),1,55,'Not self made Assets:','grey36'),
+            CreditText(SH(2150),1,60,'quinquefive-font','White'),
 
-            CreditText(2300,1,55,'The Guy who also exists:','grey36'),
-            CreditText(2350,1,60,'Noah','White'),
+            CreditText(SH(2300),1,55,'The Guy who also exists:','grey36'),
+            CreditText(SH(2350),1,60,'Noah','White'),
 
-            CreditText(2500,1,55,'Programms Used:','grey36'),
-            CreditText(2550,1,70,'Paint.net','White'),
-            CreditText(2600,1,70,'Photoshop','White'),
-            CreditText(2650,1,70,'Bandlab','White'),
-            CreditText(2700,1,70,'JSFXR','White'),
-            CreditText(2750,1,70,'VSCode, Pyhton and Pygame','White'),
-            CreditText(3000,0.7,55,'GEH SCHEIßEN!','orangered'),
-            CreditText(3050,0.7,65,'and thanks for playing the Game','grey36'),
+            CreditText(SH(2500),1,55,'Programms Used:','grey36'),
+            CreditText(SH(2550),1,70,'Paint.net','White'),
+            CreditText(SH(2600),1,70,'Photoshop','White'),
+            CreditText(SH(2650),1,70,'Bandlab','White'),
+            CreditText(SH(2700),1,70,'JSFXR','White'),
+            CreditText(SH(2750),1,70,'VSCode, Pyhton and Pygame','White'),
+            CreditText(SH(3000),0.7,55,'GEH SCHEIßEN!','orangered'),
+            CreditText(SH(3050),0.7,65,'and thanks for playing the Game','grey36'),
 
-            CreditText(4200,1.5,60,'Bro why you waitin?','White'),
+            CreditText(SH(4200),1.5,60,'Bro why you waitin?','White'),
 
-            CreditText(5000,1.5,60,'There is no more!','White'),
+            CreditText(SH(5000),1.5,60,'There is no more!','White'),
 
-            CreditText(7000,1.5,60,'If you already wait,','White'),
-            CreditText(7050,1.5,60,'donate us something!','White'),
+            CreditText(SH(7000),1.5,60,'If you already wait,','White'),
+            CreditText(SH(7050),1.5,60,'donate us something!','White'),
 
-            CreditText(9500,1.5,60,'Play our Games or Ice Cube','White'),
-            CreditText(9550,1.5,60,'will never return','White'),
+            CreditText(SH(9500),1.5,60,'Play our Games or Ice Cube','White'),
+            CreditText(SH(9550),1.5,60,'will never return','White'),
 
-            CreditText(11000,1.5,60,'Thanks for waisting','White'),
-            CreditText(11050,1.5,60,'your Time!','White')
+            CreditText(SH(11000),1.5,60,'Thanks for waisting','White'),
+            CreditText(SH(11050),1.5,60,'your Time!','White')
             ]
             gamestate = 'Credits'
 
@@ -1152,8 +1163,8 @@ while run:
             if button.draw(Homescreen,Latest_Level):
                 if Latest_Level >= int(button.Id):
                     level = World(load_World(int(button.Id),Level_Dat[button.Id][1]),Level_Dat[int(button.Id)][0],button.Id) 
-                    player = Player(500,300,100,level)
-                    thermometer = Thermometer(00,20,(200,200),5-level.Texturepack)
+                    player = Player(SW(500),SH(300),SW(100),level)
+                    thermometer = Thermometer(SW(00),SW(20),(SW(200),SH(200)),5-level.Texturepack)
                     pygame.mixer.Channel(0).play(Level_Dat[level.Id][5],loops=-1)
                     SUNMELT = Level_Dat[level.Id][2]/200 
                     gamestate = 'Game'                  
@@ -1161,8 +1172,8 @@ while run:
         if Latest_Level >= 9:
             if Select_Button.draw(Homescreen,Latest_Level):
                 level = World(load_World(int(9),Level_Dat[9][1]),Level_Dat[int(9)][0],9)
-                player = Player(500,300,100,level)
-                thermometer = Thermometer(00,20,(200,200),5-level.Texturepack)
+                player = Player(SW(500),SH(300),SW(100),level)
+                thermometer = Thermometer(SW(00),SW(20),(SW(200),SH(200)),5-level.Texturepack)
                 pygame.mixer.Channel(0).play(Level_Dat[level.Id][5],loops=-1)
                 SUNMELT = Level_Dat[level.Id][2]/200
                 gamestate = 'Game'
@@ -1171,7 +1182,7 @@ while run:
         
     elif gamestate == 'Game':
         
-        l = [(SCREEN_WIDTH/5+100,100),(SCREEN_WIDTH/5+400,300),(SCREEN_WIDTH/5*2+400,300),(SCREEN_WIDTH/5*3+400,300),(SCREEN_WIDTH/5*4+400,300),(SCREEN_WIDTH,300)]
+        l = [(SCREEN_WIDTH/5+SW(100),100),(SCREEN_WIDTH/5+SW(400),300),(SCREEN_WIDTH/5*2+SW(400),300),(SCREEN_WIDTH/5*3+SW(400),300),(SCREEN_WIDTH/5*4+SW(400),300),(SCREEN_WIDTH,300)]
 
         for i in range(0,5):
             spawn_Particle(l[i][0],0,Level_Dat[level.Id][4],0,Level_Dat[level.Id][3],5,-4,4,3,5,3,despawn=l[i][1])
@@ -1217,9 +1228,9 @@ while run:
         window.blit(gif.image,gif.rect)
         if Finished[0]:
             if Home2_Button.draw(window):
-                gamestate = 'Home'   
+                gamestate = 'Home'  
                 pygame.mixer.Channel(0).stop()
-                pygame.mixer.Channel(0).play(pygame.mixer.Sound(r'assets\sounds\music\main_menu.mp3'),loops=-1)
+                pygame.mixer.Channel(0).play(pygame.mixer.Sound(r'assets\sounds\music\main_menu.mp3'),loops=-1)           
 
     elif gamestate == 'Paused':
         pygame.mixer.Channel(0).pause()
