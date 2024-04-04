@@ -8,3 +8,5 @@ There are 2 versions of the Game. 1 is scaled smaller than the other. Download w
 You are an Ice Cube that wants to get to a drink to make the drink perfect. But you need to be careful. You have to plattform across various obstacles while trying not to melt. The thermometer will indicate how fast you are melting. Can you manage to make "THE PERFECT DRINK"? 
 
 Good Luck, and have fun!
+
+I couldnt add assets here because there is a limit on how many files you can add and the assets folder has many small files. You can get the assets if you download the Game with itch.io.
